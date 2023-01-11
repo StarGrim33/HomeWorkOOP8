@@ -1,68 +1,79 @@
-﻿namespace HomeWorkOOP8
+﻿using System;
+
+namespace HomeWorkOOP8
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Menu();
+            Arena arena = new();
+            arena.StartFight();
+        }
+    }
+
+    class Arena
+    {
+        Fighter? leftFighter;
+        Fighter? rightFighter;
+
+        Fighter[] fighters =
+        {
+                new Monk("Монах", 100, 20, 10, "Каждый третий удар наносит противнику 40 ед. урона"),
+                new Warrior("Воин", 110, 25, 15, "При падении здоровья ниже 50% наносит увеличенный урон"),
+                new Hunter("Охотник", 100, 30,5,"Имеет шанс 30% восстановить 20 ед. здоровья"),
+                new Paladin("Паладин", 120, 20, 35, "С вероятностью 25% блокирует входящий урон, \nпри снижении здоровья меньше 30 увеличивается наносимый урон"),
+                new Wizard("Маг", 90, 30, 5, "Имеет шанс 20% нанести тройной урон и восстановить 20 ед. здоровья")
+        };
+
+        public void StartFight()
+        {
+            ShowFighters();
+            leftFighter = ChooseFighter();
+            rightFighter = ChooseFighter();
+            Console.WriteLine("Для начала боя нажмите любую клавишу: ");
+            Console.ReadKey();
+            Console.Clear();
+
+            while (leftFighter?.Health > 0 && rightFighter?.Health > 0)
+            {
+                leftFighter.Attack(rightFighter, leftFighter.Damage);
+
+                rightFighter.Attack(leftFighter, rightFighter.Damage);
+
+                leftFighter.ShowCurrentHealth();
+                rightFighter.ShowCurrentHealth();
+            }
+
+            if (leftFighter?.Health > rightFighter?.Health)
+            {
+                Console.WriteLine($"Победил: {leftFighter.Name}");
+            }
+            else
+            {
+                Console.WriteLine($"Победил: {rightFighter?.Name}");
+            }
         }
 
-        public static void Menu()
+        private void ShowFighters()
         {
-            Fighter[] fighters =
-            {
-                new Monk("Монах",100,20,10,"Каждый третий удар наносит противнику 40 ед. урона"),
-                new Warrior("Воин",110, 25,15,"При падении здоровья ниже 50% наносит увеличенный урон"),
-                //new Hunter("Охотник",100, 30,5,"Имеет шанс 30% восстановить 20 ед. здоровья"),
-                //new Paladin("Паладин",120, 20, 35, "Снижение урона с помощью брони"),
-                //new Wizard("Маг", 90, 30, 5, "Имеет шанс 20% нанести тройной урон и восстановить 20 ед. здоровья")
-            };
+            Console.WriteLine("Список бойцов: ");
 
             for (int i = 0; i < fighters.Length; i++)
             {
                 Console.Write((i + 1) + " ");
                 fighters[i].ShowStats();
             }
+        }
 
-            Console.WriteLine($"Выберите первого бойца: ");
-            bool isNumber = int.TryParse(Console.ReadLine(), out int userChoice);
+        private Fighter ChooseFighter()
+        {
+            Console.WriteLine($"Выберите бойца: ");
+            int userChoice0 = Convert.ToInt32(Console.ReadLine());
 
-            if (isNumber)
-            {
-                Fighter leftFighter = fighters[userChoice - 1];
-                Console.WriteLine($"Выбран боец в левом углу: {leftFighter.Name}");
-
-                Console.WriteLine($"Выберите второго бойца: ");
-                bool isNumber1 = int.TryParse(Console.ReadLine(), out int userChoice1);
-
-                if (isNumber1)
-                {
-                    Fighter rightFighter = fighters[userChoice1 - 1];
-                    Console.WriteLine($"Выбран боец в правом углу: {rightFighter.Name}");
-                    Console.Clear();
-
-                    leftFighter.ShowCurrentHealth();
-                    rightFighter.ShowCurrentHealth();
-                    Console.WriteLine("------------");
-
-                    while (leftFighter.Health > 0 && rightFighter.Health > 0)
-                    {
-                        leftFighter.Attack(rightFighter, leftFighter.Damage);
-                        rightFighter.Attack(leftFighter, rightFighter.Damage);
-                        leftFighter.ShowCurrentHealth();
-                        rightFighter.ShowCurrentHealth();
-                    }
-
-                    if (leftFighter.Health > rightFighter.Health)
-                    {
-                        Console.WriteLine($"Победил: {leftFighter.Name}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Победил: {rightFighter.Name}");
-                    }
-                }
-            }
+            Fighter leftFighter = fighters[userChoice0 - 1];
+            Console.WriteLine($"Выбран боец в левом углу {leftFighter.Name}");
+            Console.WriteLine("------------");
+            return leftFighter;
         }
     }
 
@@ -95,17 +106,20 @@
         }
 
         public abstract void Attack(Fighter fighter, int damage);
-        public abstract void TakeDamage(int damage);
+        public virtual void TakeDamage(int damage)
+        {
+            Health -= damage - Armor;
+        }
     }
 
     class Monk : Fighter
     {
+        private int _attackCount;
+
         public Monk(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
         {
 
         }
-
-        private int _attackCount;
 
         public override void Attack(Fighter fighter, int damage)
         {
@@ -119,13 +133,8 @@
             }
             else
             {
-                fighter.TakeDamage(damage);
+                fighter.TakeDamage(Damage);
             }
-        }
-
-        public override void TakeDamage(int damage)
-        {
-            Health -= damage - Armor;
         }
     }
 
@@ -147,111 +156,150 @@
             }
             else
             {
-                fighter.TakeDamage(damage);
+                fighter.TakeDamage(Damage);
+            }
+        }
+    }
+
+    class Hunter : Fighter
+    {
+        public Hunter(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
+        {
+            Health = health;
+        }
+
+        public new int Health { get; private set; }
+
+        public override void Attack(Fighter fighter, int damage)
+        {
+            Random random = new();
+
+            if (SelfHealing(random))
+            {
+                Health += 20;
+                Console.WriteLine($"{Name} восстановил 20 ед. здоровья");
+                fighter.TakeDamage(Damage);
+            }
+            else
+            {
+                fighter.TakeDamage(Damage);
+            }
+        }
+
+        private bool SelfHealing(Random random)
+        {
+            int number = random.Next(1, 4);
+
+            if (number == 3)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    class Paladin : Fighter
+    {
+        public Paladin(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
+        {
+            
+        }
+
+        public override void Attack(Fighter fighter, int damage)
+        {
+            int increasedDamage;
+
+            if (Health < 40)
+            {
+                increasedDamage = 30;
+                fighter.TakeDamage(increasedDamage);
+            }
+            else
+            {
+                fighter.TakeDamage(Damage);
             }
         }
 
         public override void TakeDamage(int damage)
         {
-            Health -= damage - Armor;
+            Random random = new();
+
+            if(LightProtection(random))
+            {
+                Health -= damage * 0;
+            }
+            else
+            {
+                Health -= damage - Armor;
+            }
+        }
+
+        private bool LightProtection(Random random)
+        {
+            int number = random.Next(1, 5);
+
+            if (number == 5)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
-    //class Hunter : Fighter
-    //{
-    //    public Hunter(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
-    //    {
-    //        Health = health;
-    //    }
+    class Wizard : Fighter
+    {
+        public Wizard(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
+        {
+            Health = health;
+        }
 
-    //    public new int Health { get; private set; }
+        public new int Health { get; private set; }
 
-    //    public override void Attack(Fighter fighter, int damage)
-    //    {
-    //        Random random = new();
+        public override void Attack(Fighter fighter, int damage)
+        {
+            Random random = new();
+            int increasedDamage;
+            int multiplierDamage = 3;
 
-    //        if (Vanish(random))
-    //        {
-    //            Health += 20;
-    //            base.Attack(fighter, damage);
-    //            Console.WriteLine($"{Name} восстановил 20 ед. здоровья");
-    //        }
-    //        else
-    //        {
-    //            base.Attack(fighter, damage);
-    //        }
-    //    }
+            if (MoonSword(random))
+            {
+                increasedDamage = damage * multiplierDamage;
+                Health += 20;
+                Console.WriteLine($"{Name} восстановил 20 ед. здоровья и нанес критический урон");
+                fighter.TakeDamage(increasedDamage);
+            }
+            else
+            {
+                fighter.TakeDamage(damage);
+            }
+        }
 
-    //    private bool Vanish(Random random)
-    //    {
-    //        int number = random.Next(1, 4);
+        private bool MoonSword(Random random)
+        {
+            int number = random.Next(1, 6);
 
-    //        if (number == 3)
-    //        {
-    //            return true;
-    //        }
-    //        else
-    //        {
-    //            return false;
-    //        }
-    //    }
-    //}
-
-    //class Paladin : Fighter
-    //{
-    //    public Paladin(string name, int health, int damage, int armor, string spell) : base(name, health += armor, damage, armor, spell)
-    //    {
-    //        Health = health;
-    //        Armor = armor;
-    //    }
-
-    //    public int Armor { get; private set; }
-    //    public new int Health { get; private set; }
-    //}
-
-    //class Wizard : Fighter
-    //{
-    //    public Wizard(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
-    //    {
-    //        Health = health;
-    //    }
-
-    //    public new int Health { get; private set; }
-
-    //    public override void Attack(Fighter fighter, int damage)
-    //    {
-    //        Random random = new();
-    //        int increasedDamage;
-    //        int multiplier = 3;
-
-    //        if (MoonSword(random))
-    //        {
-    //            increasedDamage = damage * multiplier;
-    //            Health += 20;
-    //            base.Attack(fighter, increasedDamage);
-    //            Console.WriteLine($"{Name} восстановил 20 ед. здоровья и нанес критический урон");
-    //        }
-    //        else
-    //        {
-    //            base.Attack(fighter, damage);
-    //        }
-    //    }
-
-    //    private bool MoonSword(Random random)
-    //    {
-    //        int number = random.Next(1, 6);
-
-    //        if (number == 5)
-    //        {
-    //            return true;
-    //        }
-    //        else
-    //        {
-    //            return false;
-    //        }
-    //    }
-    //}
+            if (number == 5)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
 }
+
+
+
+
+
 
 
 
