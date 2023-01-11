@@ -13,8 +13,8 @@ namespace HomeWorkOOP8
 
     class Arena
     {
-        Fighter? leftFighter;
-        Fighter? rightFighter;
+        private Fighter? leftFighter;
+        private Fighter? rightFighter;
 
         Fighter[] fighters =
         {
@@ -68,9 +68,9 @@ namespace HomeWorkOOP8
         private Fighter ChooseFighter()
         {
             Console.WriteLine($"Выберите бойца: ");
-            int userChoice0 = Convert.ToInt32(Console.ReadLine());
+            int userChoice = Convert.ToInt32(Console.ReadLine());
 
-            Fighter leftFighter = fighters[userChoice0 - 1];
+            Fighter leftFighter = fighters[userChoice - 1];
             Console.WriteLine($"Выбран боец в левом углу {leftFighter.Name}");
             Console.WriteLine("------------");
             return leftFighter;
@@ -163,12 +163,12 @@ namespace HomeWorkOOP8
 
     class Hunter : Fighter
     {
+        private int _health;
+
         public Hunter(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
         {
-            Health = health;
+            health = _health;
         }
-
-        public new int Health { get; private set; }
 
         public override void Attack(Fighter fighter, int damage)
         {
@@ -176,7 +176,7 @@ namespace HomeWorkOOP8
 
             if (SelfHealing(random))
             {
-                Health += 20;
+                _health += 20;
                 Console.WriteLine($"{Name} восстановил 20 ед. здоровья");
                 fighter.TakeDamage(Damage);
             }
@@ -254,12 +254,12 @@ namespace HomeWorkOOP8
 
     class Wizard : Fighter
     {
+        private int _health;
+
         public Wizard(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
         {
-            Health = health;
+            health = _health;
         }
-
-        public new int Health { get; private set; }
 
         public override void Attack(Fighter fighter, int damage)
         {
@@ -270,7 +270,7 @@ namespace HomeWorkOOP8
             if (MoonSword(random))
             {
                 increasedDamage = damage * multiplierDamage;
-                Health += 20;
+                _health += 20;
                 Console.WriteLine($"{Name} восстановил 20 ед. здоровья и нанес критический урон");
                 fighter.TakeDamage(increasedDamage);
             }
