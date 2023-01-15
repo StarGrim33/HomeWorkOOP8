@@ -37,6 +37,7 @@
 
             fighter1.ShowCurrentHealth();
             fighter2.ShowCurrentHealth();
+
             Console.WriteLine($"{new string('-', 25)}");
 
             while (fighter1.Health > 0 && fighter2.Health > 0)
