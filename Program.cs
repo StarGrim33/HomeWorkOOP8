@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HomeWorkOOP8
+﻿namespace HomeWorkOOP8
 {
     internal class Program
     {
@@ -13,44 +11,55 @@ namespace HomeWorkOOP8
 
     class Arena
     {
-        private Fighter? leftFighter;
-        private Fighter? rightFighter;
+        private Fighter? fighter1;
+        private Fighter? fighter2;
 
-        Fighter[] fighters =
+        private List<Fighter> _fighters = new();
+
+        public Arena()
         {
-                new Monk("Монах", 100, 20, 10, "Каждый третий удар наносит противнику 40 ед. урона"),
-                new Warrior("Воин", 110, 25, 15, "При падении здоровья ниже 50% наносит увеличенный урон"),
-                new Hunter("Охотник", 100, 30,5,"Имеет шанс 30% восстановить 20 ед. здоровья"),
-                new Paladin("Паладин", 120, 20, 35, "С вероятностью 25% блокирует входящий урон, \nпри снижении здоровья меньше 30 увеличивается наносимый урон"),
-                new Wizard("Маг", 90, 30, 5, "Имеет шанс 20% нанести тройной урон и восстановить 20 ед. здоровья")
-        };
+            _fighters.Add(new Monk("Монах", 100, 20, 5, "Каждый третий удар наносит противнику 40 ед. урона"));
+            _fighters.Add(new Warrior("Воин", 110, 25, 5, "При падении здоровья ниже 50% наносит увеличенный урон"));
+            _fighters.Add(new Hunter("Охотник", 100, 30, 5, "Имеет шанс 30% восстановить 20 ед. здоровья"));
+            _fighters.Add(new Paladin("Паладин", 120, 20, 10, "С вероятностью 15% блокирует входящий урон, \nпри снижении здоровья меньше 30 увеличивается наносимый урон"));
+            _fighters.Add(new Wizard("Маг", 90, 30, 5, "Имеет шанс 20% нанести тройной урон и восстановить 20 ед. здоровья"));
+        }
 
         public void StartFight()
         {
             ShowFighters();
-            leftFighter = ChooseFighter();
-            rightFighter = ChooseFighter();
+            fighter1 = ChooseFighter();
+            fighter2 = ChooseFighter();
+
             Console.WriteLine("Для начала боя нажмите любую клавишу: ");
             Console.ReadKey();
             Console.Clear();
 
-            while (leftFighter?.Health > 0 && rightFighter?.Health > 0)
+            fighter1.ShowCurrentHealth();
+            fighter2.ShowCurrentHealth();
+            Console.WriteLine($"{new string('-', 25)}");
+
+            while (fighter1.Health > 0 && fighter2.Health > 0)
             {
-                leftFighter.Attack(rightFighter, leftFighter.Damage);
+                fighter1.Attack(fighter2);
 
-                rightFighter.Attack(leftFighter, rightFighter.Damage);
+                fighter2.Attack(fighter1);
 
-                leftFighter.ShowCurrentHealth();
-                rightFighter.ShowCurrentHealth();
+                fighter1.ShowCurrentHealth();
+                fighter2.ShowCurrentHealth();
             }
 
-            if (leftFighter?.Health > rightFighter?.Health)
+            if (fighter1.Health > 0)
             {
-                Console.WriteLine($"Победил: {leftFighter.Name}");
+                Console.WriteLine($"Победил: {fighter1.Name}");
+            }
+            else if (fighter2.Health > 0)
+            {
+                Console.WriteLine($"Победил: {fighter2.Name}");
             }
             else
             {
-                Console.WriteLine($"Победил: {rightFighter?.Name}");
+                Console.WriteLine("Ничья");
             }
         }
 
@@ -58,22 +67,50 @@ namespace HomeWorkOOP8
         {
             Console.WriteLine("Список бойцов: ");
 
-            for (int i = 0; i < fighters.Length; i++)
+            for (int i = 0; i < _fighters.Count; i++)
             {
                 Console.Write((i + 1) + " ");
-                fighters[i].ShowStats();
+                _fighters[i].ShowStats();
             }
         }
 
         private Fighter ChooseFighter()
         {
             Console.WriteLine($"Выберите бойца: ");
-            int userChoice = Convert.ToInt32(Console.ReadLine());
+            bool isNumber = int.TryParse(Console.ReadLine(), out int userChoice);
+            userChoice -= 1;
 
-            Fighter leftFighter = fighters[userChoice - 1];
-            Console.WriteLine($"Выбран боец в левом углу {leftFighter.Name}");
-            Console.WriteLine("------------");
-            return leftFighter;
+            while (isNumber)
+            {
+                if (isNumber == false)
+                {
+                    Console.WriteLine("Нужно ввести число");
+                }
+
+                if (userChoice <= _fighters.Count)
+                {
+                    Fighter fighter = _fighters[userChoice];
+
+                    if (fighter1 == fighter)
+                    {
+                        Console.WriteLine("Такой боец уже выбран, выберите другого");
+                        return ChooseFighter();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Выбран боец в левом углу {fighter.Name}");
+                        Console.WriteLine($"{ new string('-', 25) }");
+                        return fighter;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Всего 5 бойцов");
+                    return ChooseFighter();
+                }
+            }
+
+            return ChooseFighter();
         }
     }
 
@@ -105,10 +142,10 @@ namespace HomeWorkOOP8
             Console.WriteLine($"{Name}, здоровье: {Health}, урон: {Damage}");
         }
 
-        public abstract void Attack(Fighter fighter, int damage);
+        public abstract void Attack(Fighter fighter);
         public virtual void TakeDamage(int damage)
         {
-            Health -= damage - Armor;
+            Health -= (damage * Armor) / Armor;
         }
     }
 
@@ -121,12 +158,14 @@ namespace HomeWorkOOP8
 
         }
 
-        public override void Attack(Fighter fighter, int damage)
+        public override void Attack(Fighter fighter)
         {
             int criticalDamage = 40;
+            int criticalAttackNumber = 3;
+
             _attackCount++;
 
-            if (_attackCount == 3)
+            if (_attackCount == criticalAttackNumber)
             {
                 fighter.TakeDamage(criticalDamage);
                 _attackCount = 0;
@@ -145,11 +184,12 @@ namespace HomeWorkOOP8
 
         }
 
-        public override void Attack(Fighter fighter, int damage)
+        public override void Attack(Fighter fighter)
         {
             int increasedDamage;
+            int thresholdHealthValue = 35;
 
-            if (Health < 50)
+            if (Health < thresholdHealthValue)
             {
                 increasedDamage = 35;
                 fighter.TakeDamage(increasedDamage);
@@ -170,13 +210,14 @@ namespace HomeWorkOOP8
             health = _health;
         }
 
-        public override void Attack(Fighter fighter, int damage)
+        public override void Attack(Fighter fighter)
         {
             Random random = new();
+            int selfHealing = 20;
 
-            if (SelfHealing(random))
+            if (Recover(random))
             {
-                _health += 20;
+                _health += selfHealing;
                 Console.WriteLine($"{Name} восстановил 20 ед. здоровья");
                 fighter.TakeDamage(Damage);
             }
@@ -186,18 +227,12 @@ namespace HomeWorkOOP8
             }
         }
 
-        private bool SelfHealing(Random random)
+        private bool Recover(Random random)
         {
-            int number = random.Next(1, 4);
+            int chance = 30;
+            int number = random.Next(1, 100);
 
-            if (number == 3)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return number < chance;
         }
     }
 
@@ -205,14 +240,15 @@ namespace HomeWorkOOP8
     {
         public Paladin(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
         {
-            
+
         }
 
-        public override void Attack(Fighter fighter, int damage)
+        public override void Attack(Fighter fighter)
         {
             int increasedDamage;
+            int thresholdHealthValue = 40;
 
-            if (Health < 40)
+            if (Health < thresholdHealthValue)
             {
                 increasedDamage = 30;
                 fighter.TakeDamage(increasedDamage);
@@ -226,72 +262,60 @@ namespace HomeWorkOOP8
         public override void TakeDamage(int damage)
         {
             Random random = new();
+            int zeroDamageMultiplier = 0;
 
-            if(LightProtection(random))
+            if (LightProtection(random))
             {
-                Health -= damage * 0;
+                Health -= damage * zeroDamageMultiplier;
             }
             else
             {
-                Health -= damage - Armor;
+                base.TakeDamage(Damage);
             }
         }
 
         private bool LightProtection(Random random)
         {
-            int number = random.Next(1, 5);
+            int chance = 15;
+            int number = random.Next(1, 100);
 
-            if (number == 5)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return number < chance;
         }
     }
 
     class Wizard : Fighter
     {
-        private int _health;
 
         public Wizard(string name, int health, int damage, int armor, string spell) : base(name, health, damage, armor, spell)
         {
-            health = _health;
         }
 
-        public override void Attack(Fighter fighter, int damage)
+        public override void Attack(Fighter fighter)
         {
             Random random = new();
             int increasedDamage;
             int multiplierDamage = 3;
+            int selfHealing = 20;
 
             if (MoonSword(random))
             {
-                increasedDamage = damage * multiplierDamage;
-                _health += 20;
+                increasedDamage = Damage * multiplierDamage;
+                Health += selfHealing;
                 Console.WriteLine($"{Name} восстановил 20 ед. здоровья и нанес критический урон");
                 fighter.TakeDamage(increasedDamage);
             }
             else
             {
-                fighter.TakeDamage(damage);
+                fighter.TakeDamage(Damage);
             }
         }
 
         private bool MoonSword(Random random)
         {
-            int number = random.Next(1, 6);
+            int chance = 20;
+            int number = random.Next(1, 100);
 
-            if (number == 5)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return number < chance;
         }
     }
 }
