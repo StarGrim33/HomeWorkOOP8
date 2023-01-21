@@ -77,41 +77,35 @@
 
         private Fighter ChooseFighter()
         {
-            Console.WriteLine($"Выберите бойца: ");
+            Console.WriteLine($"\nВыберите бойца: ");
             bool isNumber = int.TryParse(Console.ReadLine(), out int userChoice);
             userChoice -= 1;
+            Random random = new ();
+            Fighter fightеr;
 
-            while (isNumber)
+            if (isNumber == false)
             {
-                if (isNumber == false)
-                {
-                    Console.WriteLine("Нужно ввести число");
-                }
-
-                if (userChoice <= _fighters.Count)
-                {
-                    Fighter fighter = _fighters[userChoice];
-
-                    if (fighter1 == fighter)
-                    {
-                        Console.WriteLine("Такой боец уже выбран, выберите другого");
-                        return ChooseFighter();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Выбран боец в левом углу {fighter.Name}");
-                        Console.WriteLine($"{ new string('-', 25) }");
-                        return fighter;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Всего 5 бойцов");
-                    return ChooseFighter();
-                }
+                Console.WriteLine("Нужно ввести число");
             }
 
-            return ChooseFighter();
+            if (userChoice < _fighters.Count && userChoice > 0)
+            {
+                Fighter fighter = _fighters[userChoice];
+
+                if (fighter1 == fighter)
+                {
+                    Console.WriteLine("Такой боец уже выбран, выберите другого");
+                }
+
+                Console.WriteLine($"Выбран боец в левом углу {fighter.Name}");
+                Console.WriteLine($"{new string('-', 25)}");
+                return fighter;
+            }
+
+            fightеr = _fighters[random.Next(_fighters.Count)];
+            Console.WriteLine($"Выбран рандомный боец: {fightеr.Name}");
+            Console.ReadKey();
+            return fightеr;
         }
     }
 
@@ -146,7 +140,8 @@
         public abstract void Attack(Fighter fighter);
         public virtual void TakeDamage(int damage)
         {
-            Health -= (damage * Armor) / Armor;
+            int percentDivider = 100;
+            Health -= (damage * Armor) / percentDivider;
         }
     }
 
@@ -216,19 +211,16 @@
             Random random = new();
             int selfHealing = 20;
 
-            if (Recover(random))
+            if (CanUseSkillRecover(random))
             {
                 _health += selfHealing;
-                Console.WriteLine($"{Name} восстановил 20 ед. здоровья");
-                fighter.TakeDamage(Damage);
+                Console.WriteLine($"{Name} восстановил {selfHealing} ед. здоровья");
             }
-            else
-            {
-                fighter.TakeDamage(Damage);
-            }
+
+            fighter.TakeDamage(Damage);
         }
 
-        private bool Recover(Random random)
+        private bool CanUseSkillRecover(Random random)
         {
             int chance = 30;
             int number = random.Next(1, 100);
@@ -298,11 +290,11 @@
             int multiplierDamage = 3;
             int selfHealing = 20;
 
-            if (MoonSword(random))
+            if (CanUseMoonSword(random))
             {
                 increasedDamage = Damage * multiplierDamage;
                 Health += selfHealing;
-                Console.WriteLine($"{Name} восстановил 20 ед. здоровья и нанес критический урон");
+                Console.WriteLine($"{Name} восстановил {selfHealing} ед. здоровья и нанес критический урон");
                 fighter.TakeDamage(increasedDamage);
             }
             else
@@ -311,7 +303,7 @@
             }
         }
 
-        private bool MoonSword(Random random)
+        private bool CanUseMoonSword(Random random)
         {
             int chance = 20;
             int number = random.Next(1, 100);
