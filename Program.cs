@@ -104,6 +104,7 @@
 
             fightеr = _fighters[random.Next(_fighters.Count)];
             Console.WriteLine($"Выбран рандомный боец: {fightеr.Name}");
+            Console.WriteLine("Нажмите любую кнопку");
             Console.ReadKey();
             return fightеr;
         }
