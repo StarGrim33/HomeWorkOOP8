@@ -80,7 +80,8 @@
             Console.WriteLine($"\nВыберите бойца: ");
             bool isNumber = int.TryParse(Console.ReadLine(), out int userChoice);
             userChoice -= 1;
-            Random random = new ();
+
+            Random random = new();
             Fighter fightеr;
 
             if (isNumber == false)
@@ -103,9 +104,11 @@
             }
 
             fightеr = _fighters[random.Next(_fighters.Count)];
+
             Console.WriteLine($"Выбран рандомный боец: {fightеr.Name}");
             Console.WriteLine("Нажмите любую кнопку");
             Console.ReadKey();
+
             return fightеr;
         }
     }
