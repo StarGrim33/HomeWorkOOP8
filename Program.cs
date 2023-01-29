@@ -107,8 +107,6 @@
                 Console.WriteLine($"\nВыберите бойца: ");
                 bool isNumber = int.TryParse(Console.ReadLine(), out int userChoice);
 
-                Random random = new();
-
                 if (isNumber == false)
                 {
                     Console.WriteLine("Нужно ввести число");
@@ -143,7 +141,7 @@
         public int Health { get; protected set; }
         public int Damage { get; protected set; }
         public int Armor { get; protected set; }
-        public string? Spell { get; protected set; }
+        public string Spell { get; protected set; }
 
         public void ShowStats()
         {
@@ -199,18 +197,14 @@
 
         public Warrior(string name, int health, int damage, int armor) : base(name, health, damage, armor)
         {
-            Spell = "При падении здоровья ниже " + _thresholdHealthValue + " наносит " + _increasedDamage + " ед. урона";
+            Spell = "При падении здоровья ниже " + _thresholdHealthValue + " наносит увеличенный урон в размере " + _increasedDamage + " ед.";
         }
 
         public override void Attack(Fighter fighter)
         {
-            int increasedDamage;
-            int thresholdHealthValue = 35;
-
-            if (Health < thresholdHealthValue)
+            if (Health < _thresholdHealthValue)
             {
-                increasedDamage = 40;
-                fighter.TakeDamage(increasedDamage);
+                fighter.TakeDamage(_increasedDamage);
             }
             else
             {
@@ -222,7 +216,7 @@
     class Hunter : Fighter
     {
         private int _chance = 10;
-        private int _selfHealing = 10;
+        private int _selfHealing = 15;
 
         public Hunter(string name, int health, int damage, int armor) : base(name, health, damage, armor)
         {
@@ -329,10 +323,9 @@
 
         private bool CanUseMoonSword(Random random)
         {
-            int chance = 20;
             int number = random.Next(1, 100);
 
-            return number < chance;
+            return number < _chance;
         }
     }
 }
