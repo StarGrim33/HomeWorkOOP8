@@ -27,32 +27,40 @@
 
         public void StartFight()
         {
-            Fighter? fighter = null;
+            ChooseFighters();
+            Battle();
+            DetermineTheWinner();
+        }
 
-            while(_fighter1 == null && _fighter2 == null)
+        private void ShowFighters()
+        {
+            Console.WriteLine("Список бойцов: ");
+
+            for (int i = 0; i < _fighters.Count; i++)
             {
-                ShowFighters();
-
-                if (ChooseFighter(out fighter))
-                {
-                    _fighter1 = fighter;
-                }
-
-                if (ChooseFighter(out fighter))
-                {
-                    _fighter2 = fighter;
-                }
-
-                if(_fighter1 == _fighter2)
-                {
-                    Console.WriteLine("Нельзя выбрать одинаковых бойцов");
-                    Console.ReadKey();
-                    _fighter1 = null;
-                    _fighter2 = null;
-                    Console.Clear();
-                }
+                Console.Write((i + 1) + " ");
+                _fighters[i].ShowStats();
             }
+        }
 
+        private void DetermineTheWinner()
+        {
+            if (_fighter1.Health > 0)
+            {
+                Console.WriteLine($"Победил: {_fighter1.Name}");
+            }
+            else if (_fighter2.Health > 0)
+            {
+                Console.WriteLine($"Победил: {_fighter2.Name}");
+            }
+            else
+            {
+                Console.WriteLine("Ничья");
+            }
+        }
+
+        private void Battle()
+        {
             Console.WriteLine("Для начала боя нажмите любую клавишу: ");
             Console.ReadKey();
             Console.Clear();
@@ -71,33 +79,38 @@
                 _fighter1.ShowCurrentHealth();
                 _fighter2.ShowCurrentHealth();
             }
-
-            if (_fighter1.Health > 0)
-            {
-                Console.WriteLine($"Победил: {_fighter1.Name}");
-            }
-            else if (_fighter2.Health > 0)
-            {
-                Console.WriteLine($"Победил: {_fighter2.Name}");
-            }
-            else
-            {
-                Console.WriteLine("Ничья");
-            }
         }
 
-        private void ShowFighters()
+        private void ChooseFighters()
         {
-            Console.WriteLine("Список бойцов: ");
+            Fighter? fighter = null;
 
-            for (int i = 0; i < _fighters.Count; i++)
+            while (_fighter1 == null && _fighter2 == null)
             {
-                Console.Write((i + 1) + " ");
-                _fighters[i].ShowStats();
+                ShowFighters();
+
+                if (ChooseAFighter(out fighter))
+                {
+                    _fighter1 = fighter;
+                }
+
+                if (ChooseAFighter(out fighter))
+                {
+                    _fighter2 = fighter;
+                }
+
+                if (_fighter1 == _fighter2)
+                {
+                    Console.WriteLine("Нельзя выбрать одинаковых бойцов");
+                    Console.ReadKey();
+                    _fighter1 = null;
+                    _fighter2 = null;
+                    Console.Clear();
+                }
             }
         }
 
-        private bool ChooseFighter(out Fighter fighter)
+        private bool ChooseAFighter(out Fighter fighter)
         {
             fighter = null;
             bool isProgramOn = true;
@@ -238,7 +251,9 @@
 
         private bool CanUseSkillRecover(Random random)
         {
-            int number = random.Next(1, 100);
+            int minNumber = 1;
+            int maxNumber = 100;
+            int number = random.Next(minNumber, maxNumber);
 
             return number < _chance;
         }
@@ -274,7 +289,7 @@
             Random random = new();
             int zeroDamageMultiplier = 0;
 
-            if (isBlockOn(random))
+            if (IsBlockOn(random))
             {
                 Health -= damage * zeroDamageMultiplier;
             }
@@ -284,9 +299,11 @@
             }
         }
 
-        private bool isBlockOn(Random random)
+        private bool IsBlockOn(Random random)
         {
-            int number = random.Next(1, 100);
+            int minNumber = 1;
+            int maxNumber = 100;
+            int number = random.Next(minNumber, maxNumber);
 
             return number < _chance;
         }
@@ -323,7 +340,9 @@
 
         private bool CanUseMoonSword(Random random)
         {
-            int number = random.Next(1, 100);
+            int minNumber = 1;
+            int maxNumber = 100;
+            int number = random.Next(minNumber, maxNumber);
 
             return number < _chance;
         }
