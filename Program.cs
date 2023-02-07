@@ -29,7 +29,7 @@
         {
             ChooseFighters();
             Battle();
-            DetermineTheWinner();
+            DetermineWinner();
         }
 
         private void ShowFighters()
@@ -43,7 +43,7 @@
             }
         }
 
-        private void DetermineTheWinner()
+        private void DetermineWinner()
         {
             if (_fighter1.Health > 0)
             {
@@ -89,12 +89,12 @@
             {
                 ShowFighters();
 
-                if (ChooseAFighter(out fighter))
+                if (IsChosenFighter(out fighter))
                 {
                     _fighter1 = fighter;
                 }
 
-                if (ChooseAFighter(out fighter))
+                if (IsChosenFighter(out fighter))
                 {
                     _fighter2 = fighter;
                 }
@@ -110,7 +110,7 @@
             }
         }
 
-        private bool ChooseAFighter(out Fighter fighter)
+        private bool IsChosenFighter(out Fighter fighter)
         {
             fighter = null;
             bool isProgramOn = true;
