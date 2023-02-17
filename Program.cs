@@ -49,7 +49,7 @@
             {
                 Console.WriteLine($"Победил: {_fighter1.Name}");
             }
-            else if (_fighter2.Health > 0)
+            else if (_fighter2.Health > 0 && _fighter1.Health <= 0)
             {
                 Console.WriteLine($"Победил: {_fighter2.Name}");
             }
@@ -83,14 +83,12 @@
 
         private void ChooseFighters()
         {
-            Fighter? fighter = null;
-
             while (_fighter1 == null || _fighter2 == null)
             {
                 ShowFighters();
 
-                _fighter1 = ChosenFighter(out fighter);
-                _fighter2 = ChosenFighter(out fighter);
+                _fighter1 = ChosenFighter();
+                _fighter2 = ChosenFighter();
 
                 if (_fighter1 == _fighter2)
                 {
@@ -103,9 +101,8 @@
             }
         }
 
-        private Fighter ChosenFighter(out Fighter fighter)
+        private Fighter? ChosenFighter()
         {
-            fighter = null;
             bool isProgramOn = true;
 
             while (isProgramOn)
@@ -120,7 +117,7 @@
 
                 if (userChoice <= _fighters.Count && userChoice > 0)
                 {
-                    fighter = _fighters[userChoice - 1];
+                    Fighter fighter = _fighters[userChoice - 1];
 
                     Console.WriteLine($"Выбран боец в левом углу {fighter.Name}");
                     Console.WriteLine($"{new string('-', 25)}");
@@ -128,7 +125,7 @@
                 }
             }
 
-            return fighter;
+            return null;
         }
     }
 
@@ -180,11 +177,9 @@
 
         public override void Attack(Fighter fighter)
         {
-            int criticalAttackNumber = 3;
-
             _attackCount++;
 
-            if (_attackCount == criticalAttackNumber)
+            if (_attackCount % 3 == 0)
             {
                 fighter.TakeDamage(_criticalDamage);
                 _attackCount = 0;
