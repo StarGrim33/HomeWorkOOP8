@@ -85,19 +85,12 @@
         {
             Fighter? fighter = null;
 
-            while (_fighter1 == null && _fighter2 == null)
+            while (_fighter1 == null || _fighter2 == null)
             {
                 ShowFighters();
 
-                if (IsChosenFighter(out fighter))
-                {
-                    _fighter1 = fighter;
-                }
-
-                if (IsChosenFighter(out fighter))
-                {
-                    _fighter2 = fighter;
-                }
+                _fighter1 = ChosenFighter(out fighter);
+                _fighter2 = ChosenFighter(out fighter);
 
                 if (_fighter1 == _fighter2)
                 {
@@ -110,7 +103,7 @@
             }
         }
 
-        private bool IsChosenFighter(out Fighter fighter)
+        private Fighter ChosenFighter(out Fighter fighter)
         {
             fighter = null;
             bool isProgramOn = true;
@@ -131,11 +124,11 @@
 
                     Console.WriteLine($"Выбран боец в левом углу {fighter.Name}");
                     Console.WriteLine($"{new string('-', 25)}");
-                    return true;
+                    return fighter;
                 }
             }
 
-            return false;
+            return fighter;
         }
     }
 
@@ -348,13 +341,3 @@
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
